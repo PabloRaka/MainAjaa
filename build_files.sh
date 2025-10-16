@@ -3,15 +3,15 @@
 # Keluar jika ada error
 set -e
 
-python3.9 -m ensurepip
-python3.9 -m pip install --upgrade pip
-
+# Pastikan pip terinstall
+python3.12 -m ensurepip
+python3.12 -m pip install --upgrade pip
 
 # Install dependencies
-python3.9 -m pip install -r requirements.txt
+python3.12 -m pip install -r requirements.txt
 
 # Kumpulkan file statis
-python manage.py collectstatic --no-input --clear
+python3.12 manage.py collectstatic --no-input --clear
 
 # Jalankan migrasi database
-python manage.py migrate
+python3.12 manage.py migrate
