@@ -3,4 +3,4 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gamestore.settings')
 
-app = get_wsgi_application() # <--- INI SOLUSINYA
+app = get_wsgi_application()
