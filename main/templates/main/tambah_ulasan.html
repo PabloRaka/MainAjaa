@@ -1,0 +1,70 @@
+{% extends "main/base.html" %}
+
+{% block title %}Beri Ulasan{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12 max-w-2xl">
+    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-8">
+        <h1 class="text-3xl font-bold text-white">Beri Ulasan untuk</h1>
+        <p class="text-purple-400 text-xl mb-6">{{ pembelian.akun.nama_akun }}</p>
+
+        <form method="post" id="review-form">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label class="block text-gray-400 text-sm font-bold mb-3">Rating Anda:</label>
+                
+                <div class="flex gap-1" id="star-container">
+                    <input type="radio" id="star1" name="rating" value="1" class="hidden" required>
+                    <label for="star1" class="text-5xl cursor-pointer transition-colors" style="color: #4A5568;">★</label>
+                    
+                    <input type="radio" id="star2" name="rating" value="2" class="hidden">
+                    <label for="star2" class="text-5xl cursor-pointer transition-colors" style="color: #4A5568;">★</label>
+                    
+                    <input type="radio" id="star3" name="rating" value="3" class="hidden">
+                    <label for="star3" class="text-5xl cursor-pointer transition-colors" style="color: #4A5568;">★</label>
+                    
+                    <input type="radio" id="star4" name="rating" value="4" class="hidden">
+                    <label for="star4" class="text-5xl cursor-pointer transition-colors" style="color: #4A5568;">★</label>
+                    
+                    <input type="radio" id="star5" name="rating" value="5" class="hidden">
+                    <label for="star5" class="text-5xl cursor-pointer transition-colors" style="color: #4A5568;">★</label>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label for="ulasan" class="block text-gray-400 text-sm font-bold mb-2">Ulasan Anda (Opsional):</label>
+                <textarea name="ulasan" id="ulasan" rows="4" class="w-full bg-gray-800 rounded p-2 border border-gray-600 focus:ring-purple-500 focus:border-purple-500 text-white"></textarea>
+            </div>
+            
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-md transition-colors">
+                Kirim Ulasan
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    const labels = document.querySelectorAll('#star-container label');
+    const inputs = document.querySelectorAll('#star-container input');
+    let selected = 0;
+    
+    function fill(count) {
+        labels.forEach((label, i) => {
+            label.style.color = i < count ? '#FBBF24' : '#4A5568';
+        });
+    }
+    
+    labels.forEach((label, i) => {
+        label.onclick = () => {
+            selected = i + 1;
+            inputs[i].checked = true;
+            fill(selected);
+        };
+        label.onmouseenter = () => fill(i + 1);
+    });
+    
+    document.getElementById('star-container').onmouseleave = () => fill(selected);
+})();
+</script>
+{% endblock %}

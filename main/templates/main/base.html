@@ -1,0 +1,246 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mainajaa Gaming</title>
+    {% tailwind_css %}
+    <style>
+        /* Custom dark mode styles */
+        .light-mode {
+            background-color: white;
+            color: #1a202c;
+        }
+        .dark-mode {
+            background-color: #0c0c1e;
+            color: #e5e7eb;
+        }
+        .light-mode .nav-link { color: #4a5568; }
+        .dark-mode .nav-link { color: #9ca3af; }
+        .light-mode .nav-link:hover { color: #1a202c; }
+        .dark-mode .nav-link:hover { color: white; }
+        .light-mode .nav-title { color: #1a202c; }
+        .dark-mode .nav-title { color: white; }
+        .light-mode .search-input { 
+            background-color: #f3f4f6; 
+            border-color: #d1d5db;
+            color: #1a202c;
+        }
+        .dark-mode .search-input { 
+            background-color: rgba(31, 41, 55, 0.5); 
+            border-color: #374151;
+            color: #e5e7eb;
+        }
+        .light-mode .dropdown-menu {
+            background-color: white;
+            border-color: #d1d5db;
+        }
+        .dark-mode .dropdown-menu {
+            background-color: #1f2937;
+            border-color: #374151;
+        }
+        .light-mode .dropdown-item { color: #374151; }
+        .dark-mode .dropdown-item { color: #d1d5db; }
+
+        /* Toggle Switch Styles */
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #4b5563;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+        .theme-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .theme-slider {
+            background-color: #7c3aed;
+        }
+        input:checked + .theme-slider:before {
+            transform: translateX(24px);
+        }
+        .theme-slider:hover {
+            background-color: #6b7280;
+        }
+        input:checked + .theme-slider:hover {
+            background-color: #8b5cf6;
+        }
+        
+        /* Icon inside slider */
+        .theme-slider .icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            transition: opacity 0.3s;
+        }
+        .theme-slider .sun-icon {
+            left: 8px;
+            opacity: 0;
+        }
+        .theme-slider .moon-icon {
+            right: 8px;
+            opacity: 1;
+        }
+        input:checked + .theme-slider .sun-icon {
+            opacity: 1;
+        }
+        input:checked + .theme-slider .moon-icon {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="dark-mode font-sans transition-colors duration-300">
+
+    <nav class="container mx-auto px-6 py-4">
+        <div class="flex justify-between items-center">
+            <a href="{% url 'landing_page' %}" class="text-2xl font-bold nav-title">Mainajaa</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="{% url 'landing_page' %}" class="nav-title font-semibold">Home</a>
+                    <a href="{% url 'semua_akun' %}" class="nav-link hover:text-white transition-colors">Beli Akun</a>
+                    <a href="{% url 'topup_index' %}" class="nav-link hover:text-white transition-colors">Top Up</a>
+                    <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                        <button @click="open = !open" class="nav-link hover:text-white transition-colors flex items-center">
+                            Kategori Akun
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute z-10 mt-2 w-48 dropdown-menu rounded-md shadow-lg border">
+                            <a href="{% url 'kategori' 'Mobile Legends' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">Mobile Legends</a>
+                            <a href="{% url 'kategori' 'PUBG Mobile' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">PUBG Mobile</a>
+                            <a href="{% url 'kategori' 'Genshin Impact' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">Genshin Impact</a>
+                            <a href="{% url 'kategori' 'Black Desert' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">Black Desert</a>
+                            <a href="{% url 'kategori' 'Haikyuu' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">Haikyuu</a>
+                        </div>
+                    </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <!-- Theme Toggle Switch -->
+                <label class="theme-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="theme-slider">
+                        <span class="icon sun-icon">☀️</span>
+                        <span class="icon moon-icon">🌙</span>
+                    </span>
+                </label>
+
+                <form action="{% url 'search_results' %}" method="GET" class="flex items-center">
+                    <input type="search" name="q" placeholder="Cari akun..." class="search-input rounded-md py-1 px-3 text-sm border focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </form>
+
+                {% if user.is_authenticated %}
+                    <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                        <button @click="open = !open" class="flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-700 font-semibold transition-colors">
+                            Hi, {{ user.username }}!
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute right-0 z-10 mt-2 w-56 dropdown-menu rounded-md shadow-lg border">
+                            <a href="{% url 'profil' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">Profil Saya</a>
+                            <a href="{% url 'favorit' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">Favorit</a>
+                            <a href="{% url 'riwayat_pembelian' %}" class="block px-4 py-2 text-sm dropdown-item hover:bg-purple-600 hover:text-white">Riwayat Pembelian</a>
+                            {% if user.is_staff %}
+                                <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-sm text-yellow-600 hover:bg-purple-600 hover:text-white">Dashboard</a>
+                            {% endif %}
+                            <div class="border-t border-gray-300" style="border-color: #374151;"></div>
+                            <form action="{% url 'account_logout' %}" method="post" class="w-full">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-600 hover:text-white">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="nav-link hover:text-white transition-colors">Login</a>
+                    <a href="{% url 'account_signup' %}" class="ml-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    {% if messages %}
+    <div class="container mx-auto px-6">
+        {% for message in messages %}
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition.duration.500ms
+             class="flex justify-between items-center bg-green-500/80 backdrop-blur-sm border border-green-600 text-white px-4 py-3 rounded-lg relative my-4" role="alert">
+            <span class="block sm:inline">{{ message }}</span>
+            <button @click="show = false" class="ml-4 text-xl font-bold">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="pb-12">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+    (function() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        function setDarkMode() {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            themeToggle.checked = false;
+            localStorage.setItem('color-theme', 'dark');
+        }
+        
+        function setLightMode() {
+            body.classList.remove('dark-mode');
+            body.classList.add('light-mode');
+            themeToggle.checked = true;
+            localStorage.setItem('color-theme', 'light');
+        }
+        
+        // Check saved theme
+        const savedTheme = localStorage.getItem('color-theme');
+        if (savedTheme === 'light') {
+            setLightMode();
+        } else {
+            setDarkMode();
+        }
+        
+        // Toggle on change
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                setLightMode();
+            } else {
+                setDarkMode();
+            }
+        });
+    })();
+    </script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+    
+</body>
+</html>

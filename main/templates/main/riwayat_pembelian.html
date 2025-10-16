@@ -1,0 +1,101 @@
+{% extends "main/base.html" %}
+
+{% block title %}Riwayat Pembelian{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12">
+    <h1 class="text-4xl font-bold text-white mb-8">Riwayat Pembelian Anda</h1>
+
+    <div class="bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-400">
+                <thead class="text-xs text-gray-300 uppercase bg-gray-800">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">ID Transaksi</th>
+                        <th scope="col" class="px-6 py-3">Item</th>
+                        <th scope="col" class="px-6 py-3">Tanggal</th>
+                        <th scope="col" class="px-6 py-3">Total Harga</th>
+                        <th scope="col" class="px-6 py-3 text-center">Status</th>
+                        <th scope="col" class="px-6 py-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in daftar_pembelian %}
+                    <tr class="border-b border-gray-700 hover:bg-gray-800/50">
+                        <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">
+                            {{ item.kode_transaksi|stringformat:"s"|slice:":8" }}...
+                        </th>
+                        <td class="px-6 py-4">
+                            {% if item.akun %} {# Jika ini adalah pembelian Akun Gaming #}
+                                {{ item.akun.nama_akun }}
+                            {% elif item.produk %} {# Jika ini adalah pembelian Top Up #}
+                                {{ item.produk.nama_paket }}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ item.tanggal_pembelian|date:"d M Y, H:i" }}
+                        </td>
+                        <td class="px-6 py-4 font-semibold text-purple-400">
+                            Rp {{ item.harga_pembelian|floatformat:0 }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if item.status == 'COMPLETED' %}
+                                <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded-full">{{ item.get_status_display }}</span>
+                            {% elif item.status == 'PENDING' %}
+                                <button data-token="{{ item.midtrans_token }}" class="tombol-lanjut-bayar px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full hover:bg-yellow-300 transition-colors">
+                                    {{ item.get_status_display }} &rarr;
+                                </button>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-200 rounded-full">{{ item.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if item.status == 'COMPLETED' %}
+                                {% if item.akun %} {# Aksi ini hanya untuk pembelian Akun Gaming #}
+                                    <a href="{% url 'lihat_akun_dibeli' item.kode_transaksi %}" class="font-medium text-purple-400 hover:underline mr-4">Lihat Akun</a>
+                                    {% if not item.rating %}
+                                    <a href="{% url 'tambah_ulasan' item.kode_transaksi %}" class="font-medium text-blue-400 hover:underline">Beri Ulasan</a>
+                                    {% endif %}
+                                {% else %} {# Untuk Top Up yang sudah selesai, tidak ada aksi #}
+                                    <span class="text-gray-500">-</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-500">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            Anda belum memiliki riwayat pembelian.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ midtrans_client_key }}"></script>
+<script type="text/javascript">
+    document.querySelectorAll('.tombol-lanjut-bayar').forEach(button => {
+        button.addEventListener('click', function() {
+            const token = this.dataset.token;
+            if (token) {
+                snap.pay(token, {
+                    onSuccess: function(result){ window.location.reload(); },
+                    onPending: function(result){ window.location.reload(); },
+                    onError: function(result){ alert("Pembayaran gagal!"); },
+                    onClose: function(){}
+                });
+            } else {
+                alert("Token pembayaran tidak ditemukan.");
+            }
+        });
+    });
+</script>
+{% endblock %}

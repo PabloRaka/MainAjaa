@@ -1,0 +1,25 @@
+{% extends "main/base.html" %}
+{% block title %}Detail Akun Anda{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12 max-w-2xl">
+    <h1 class="text-4xl font-bold text-white text-center mb-6">Detail Akun: {{ pembelian.akun.nama_akun }}</h1>
+    <div class="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-lg mb-6" role="alert">
+        <strong class="font-bold">Penting!</strong>
+        <span class="block sm:inline">Segera ubah password dan amankan akun ini. Jangan bagikan informasi di bawah ini kepada siapa pun.</span>
+    </div>
+    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-8 space-y-4">
+        <div>
+            <p class="text-sm text-gray-400">Email/Username Akun</p>
+            <p class="text-2xl font-mono font-semibold text-white">{{ pembelian.akun.akun_email }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-400">Password Akun</p>
+            <p class="text-2xl font-mono font-semibold text-purple-400">{{ decrypted_password }}</p>
+        </div>
+    </div>
+    <div class="text-center mt-6">
+        <a href="{% url 'riwayat_pembelian' %}" class="text-purple-400 hover:text-purple-300">&larr; Kembali ke Riwayat Pembelian</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "main/base.html" %}
+
+{% block title %}Pembayaran{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12 max-w-2xl">
+    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-8">
+        <h1 class="text-3xl font-bold text-white mb-4">Ringkasan Pembayaran</h1>
+        <p class="text-gray-400 mb-6">Selesaikan pembayaran untuk akun <strong class="text-white">{{ pembelian.akun.nama_akun }}</strong>.</p>
+        
+        <div class="border-y border-gray-700 py-4 space-y-2">
+            <div id="harga-asli-container" class="{% if not pembelian.kupon %}hidden{% endif %} flex justify-between items-center text-gray-300">
+                <span>Harga Asli:</span>
+                <span class="line-through" id="harga-asli-text">Rp {{ pembelian.harga_asli|floatformat:0 }}</span>
+            </div>
+            <div id="diskon-container" class="{% if not pembelian.kupon %}hidden{% endif %} flex justify-between items-center text-green-400">
+                <span>Diskon:</span>
+                <span id="diskon-text">- Rp {{ diskon_aktif|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between items-center text-white font-bold text-xl">
+                <span>Total Bayar:</span>
+                <span class="text-purple-400" id="total-bayar-text">Rp {{ pembelian.harga_pembelian|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <label for="kode_kupon" class="block text-sm font-medium text-gray-300 mb-2">Punya Kode Kupon?</label>
+            <div class="flex space-x-2">
+                <input type="text" id="kode_kupon" placeholder="Masukkan kode di sini" class="w-full bg-gray-800 border border-gray-600 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <button type="button" id="tombol-kupon" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md">Gunakan</button>
+            </div>
+            <p id="kupon-message" class="text-sm mt-2"></p>
+        </div>
+
+        <button id="tombol-lanjut-bayar" class="mt-8 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-md transition-colors">
+            Lanjutkan ke Pembayaran
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ midtrans_client_key }}"></script>
+<script type="text/javascript">
+    // Simpan token pembayaran saat ini
+    let currentToken = '{{ pembelian.midtrans_token }}';
+    const csrftoken = getCookie('csrftoken'); // Asumsi fungsi getCookie sudah ada
+
+    // Event listener untuk tombol "Gunakan" Kupon
+    document.getElementById('tombol-kupon').onclick = function() {
+        const tombol = this;
+        const inputKupon = document.getElementById('kode_kupon');
+        const pesanKupon = document.getElementById('kupon-message');
+        
+        tombol.disabled = true;
+        tombol.innerText = '...';
+        pesanKupon.innerText = '';
+
+        fetch("{% url 'apply_coupon_api' pembelian.kode_transaksi %}", {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/json'},
+            body: JSON.stringify({ kode_kupon: inputKupon.value })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update tampilan harga
+                document.getElementById('harga-asli-container').classList.remove('hidden');
+                document.getElementById('diskon-container').classList.remove('hidden');
+                document.getElementById('harga-asli-text').innerText = 'Rp ' + data.harga_asli;
+                document.getElementById('diskon-text').innerText = '- Rp ' + data.diskon_amount;
+                document.getElementById('total-bayar-text').innerText = 'Rp ' + data.harga_baru;
+
+                // Update token pembayaran
+                currentToken = data.new_token;
+                
+                pesanKupon.className = 'text-sm mt-2 text-green-400';
+                pesanKupon.innerText = data.message;
+            } else {
+                pesanKupon.className = 'text-sm mt-2 text-red-400';
+                pesanKupon.innerText = data.error;
+            }
+        })
+        .finally(() => {
+            tombol.disabled = false;
+            tombol.innerText = 'Gunakan';
+        });
+    };
+
+    // Event listener untuk tombol "Lanjutkan ke Pembayaran"
+    document.getElementById('tombol-lanjut-bayar').onclick = function() {
+        if (currentToken) {
+            snap.pay(currentToken, {
+                onSuccess: function(result){ window.location.href = "{% url 'riwayat_pembelian' %}"; },
+                onPending: function(result){ window.location.href = "{% url 'riwayat_pembelian' %}"; },
+                onError: function(result){ alert("Pembayaran gagal!"); },
+            });
+        } else {
+            alert("Token pembayaran tidak ditemukan. Silakan coba lagi.");
+        }
+    };
+    
+    // Fungsi getCookie untuk CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "main/base.html" %}
+
+{% block title %}Profil Saya{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12">
+    <h1 class="text-4xl font-bold text-white text-center mb-10">Profil Pengguna</h1>
+
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-8">
+        <div class="w-full md:w-1/4">
+            <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                <nav class="flex flex-col space-y-2">
+                    <a href="{% url 'profil' %}" class="bg-purple-600 text-white font-semibold px-4 py-2 rounded-md">
+                        Profil Saya
+                    </a>
+                    <a href="{% url 'riwayat_pembelian' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2 rounded-md">
+                        Riwayat Pembelian
+                    </a>
+                    <a href="{% url 'favorit' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2 rounded-md">
+                        Akun Favorit
+                    </a>
+                    <a href="{% url 'account_change_password' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2 rounded-md">
+                        Ubah Password
+                    </a>
+                    <form action="{% url 'account_logout' %}" method="post" class="w-full">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-left text-red-400 hover:bg-red-800/50 hover:text-white px-4 py-2 rounded-md mt-4">
+                            Logout
+                        </button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+
+        <div class="w-full md:w-3/4">
+            <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-8">
+                <h2 class="text-2xl font-semibold text-white mb-6">Informasi Akun</h2>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-400">Alamat Email</p>
+                        <p class="text-lg text-gray-200">{{ user.email }}</p>
+                    </div>
+                     <div>
+                        <p class="text-sm text-gray-400">Tanggal Bergabung</p>
+                        <p class="text-lg text-gray-200">{{ user.date_joined|date:"d F Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

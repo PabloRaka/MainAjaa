@@ -1,0 +1,61 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-6 mt-12 pb-12">
+    <h1 class="text-4xl font-bold text-white text-center mb-6">{{ judul_halaman }}</h1>
+
+    <div class="flex justify-end mb-6">
+        <form method="GET" action="{% url 'kategori' nama_game_kategori %}" class="flex items-center gap-2">
+            <label for="sort" class="text-gray-400 mr-2">Urutkan:</label>
+            <select name="sort" id="sort" onchange="this.form.submit()" class="bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="default" {% if not request.GET.sort or request.GET.sort == 'default' %}selected{% endif %}>Terbaru</option>
+                <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Harga: Termurah</option>
+                <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Harga: Termahal</option>
+            </select>
+        </form>
+    </div>
+
+    {% if page_obj.object_list %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {% for akun in page_obj %}
+            <div class="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 shadow-lg transition-all duration-300 ease-in-out hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
+                {% if akun.gambar %}
+                    <img src="{{ akun.gambar.url }}" class="w-full h-48 object-cover rounded-md mb-4" alt="{{ akun.nama_akun }}">
+                {% else %}
+                    <img src="{% static 'images/placeholder.jpg' %}" class="w-full h-48 object-cover rounded-md mb-4" alt="Placeholder">
+                {% endif %}
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h5 class="text-lg font-semibold text-white truncate">{{ akun.nama_akun }}</h5>
+                        <p class="text-purple-400 font-bold">Rp {{ akun.harga|floatformat:0 }}</p>
+                    </div>
+                    <a href="{% url 'akun_detail' akun.pk %}" class="bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold py-2 px-4 rounded-md transition-colors">
+                        Lihat
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="flex justify-center items-center space-x-4 mt-12">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="bg-gray-800 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                    &laquo; Sebelumnya
+                </a>
+            {% endif %}
+            <span class="text-gray-400">
+                Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="bg-gray-800 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                    Berikutnya &raquo;
+                </a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="text-center p-10 bg-gray-900/50 rounded-lg">
+            <p class="text-gray-500">Belum ada akun yang dijual di kategori ini.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

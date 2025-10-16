@@ -1,0 +1,118 @@
+{% extends "main/base.html" %}
+
+{% block title %}Pembayaran Top Up{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12 max-w-2xl" x-data="{
+    kodeKupon: '',
+    isLoading: false,
+    errorMessage: '',
+    successMessage: '',
+    hargaAsli: '{{ pembelian.harga_asli|default:pembelian.harga_pembelian|floatformat:0 }}',
+    diskonAmount: '{{ diskon_aktif|floatformat:0 }}',
+    hargaBaru: '{{ pembelian.harga_pembelian|floatformat:0 }}',
+    midtransToken: '{{ pembelian.midtrans_token }}',
+
+    // FUNGSI applyCoupon() DIPINDAHKAN KE SINI
+    applyCoupon() {
+        this.isLoading = true;
+        this.errorMessage = '';
+        this.successMessage = '';
+
+        fetch('{% url 'apply_coupon_topup_api' pembelian.kode_transaksi %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ kode_kupon: this.kodeKupon })
+        })
+        .then(res => {
+            if (!res.ok) { return res.json().then(err => { throw new Error(err.error || 'Terjadi kesalahan') }); }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                this.successMessage = data.message;
+                this.hargaAsli = data.harga_asli.replace(/\./g, '');
+                this.diskonAmount = data.diskon_amount.replace(/\./g, '');
+                this.hargaBaru = data.harga_baru.replace(/\./g, '');
+                this.midtransToken = data.new_token;
+            }
+        })
+        .catch(error => { this.errorMessage = error.message; })
+        .finally(() => { this.isLoading = false; });
+    },
+
+    // FUNGSI pay() JUGA DIPINDAHKAN KE SINI
+    pay() {
+        snap.pay(this.midtransToken, {
+            onSuccess: function(result){ window.location.href = '{% url 'riwayat_pembelian' %}'; },
+            onPending: function(result){ window.location.href = '{% url 'riwayat_pembelian' %}'; },
+            onError: function(result){ alert('Pembayaran gagal!'); },
+        });
+    }
+}">
+    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-8">
+        <h1 class="text-3xl font-bold text-white mb-4">Ringkasan Pembayaran</h1>
+        <p class="text-gray-400 mb-6">Selesaikan pembayaran untuk <strong class="text-white">{{ pembelian.produk.nama_paket }}</strong>.</p>
+        
+        <div class="border-y border-gray-700 py-4 space-y-3">
+            <div class="flex justify-between items-center text-gray-300">
+                <span>ID Pemain:</span>
+                <span class="font-mono">{{ pembelian.game_user_id }}{% if pembelian.game_zone_id %} ({{pembelian.game_zone_id}}){% endif %}</span>
+            </div>
+
+            <div x-show="diskonAmount > 0" class="flex justify-between items-center text-gray-400 text-sm">
+                <span>Harga Asli:</span>
+                <span class="line-through">Rp <span x-text="Number(hargaAsli).toLocaleString('id-ID')"></span></span>
+            </div>
+             <div x-show="diskonAmount > 0" class="flex justify-between items-center text-green-400 text-sm">
+                <span>Diskon Kupon:</span>
+                <span>- Rp <span x-text="Number(diskonAmount).toLocaleString('id-ID')"></span></span>
+            </div>
+            
+            <div class="flex justify-between items-center text-white font-bold text-xl">
+                <span>Total Bayar:</span>
+                <span class="text-purple-400">Rp <span x-text="Number(hargaBaru).toLocaleString('id-ID')"></span></span>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <label class="text-gray-400">Punya Kode Kupon?</label>
+            <div class="flex space-x-2 mt-1">
+                <input type="text" x-model="kodeKupon" @keydown.enter.prevent="applyCoupon" placeholder="Masukkan kode kupon" class="w-full bg-gray-800 rounded p-2 border border-gray-600 focus:ring-purple-500">
+                <button @click="applyCoupon" :disabled="isLoading" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <span x-show="!isLoading">Pakai</span>
+                    <span x-show="isLoading">...</span>
+                </button>
+            </div>
+            <p x-show="errorMessage" x-text="errorMessage" class="text-red-400 mt-2 text-sm"></p>
+            <p x-show="successMessage" x-text="successMessage" class="text-green-400 mt-2 text-sm"></p>
+        </div>
+
+        <button @click="pay" id="tombol-bayar" class="mt-8 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-md transition-colors">
+            Lanjutkan ke Pembayaran
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ midtrans_client_key }}"></script>
+<script>
+    // BLOK INI SEKARANG LEBIH SEDERHANA, HANYA MENYEDIAKAN CSRF TOKEN
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+</script>
+{% endblock %}

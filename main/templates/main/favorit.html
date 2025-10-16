@@ -1,0 +1,85 @@
+{% extends "main/base.html" %}
+
+{% block title %}Akun Favorit Saya{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <div>
+            <h1 class="text-4xl font-bold nav-title">Akun Favorit Saya</h1>
+            <p class="nav-link mt-2">Koleksi akun yang kamu simpan</p>
+        </div>
+        
+        {% if favorit_list %}
+        <form method="get" class="mt-4 md:mt-0">
+            <div class="flex items-center space-x-4">
+                <select name="game" onchange="this.form.submit()" class="search-input border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="">Semua Game</option>
+                    {% for game in daftar_game %}
+                        <option value="{{ game }}" {% if game == game_filter_aktif %}selected{% endif %}>{{ game }}</option>
+                    {% endfor %}
+                </select>
+                
+                <select name="sort" onchange="this.form.submit()" class="search-input border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="terbaru" {% if sort_by_aktif == 'terbaru' %}selected{% endif %}>Urutkan: Terbaru</option>
+                    <option value="termurah" {% if sort_by_aktif == 'termurah' %}selected{% endif %}>Urutkan: Termurah</option>
+                    <option value="termahal" {% if sort_by_aktif == 'termahal' %}selected{% endif %}>Urutkan: Termahal</option>
+                </select>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if favorit_list %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for favorit in favorit_list %}
+        <div class="bg-gray-100 dark:bg-gray-900/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-lg transition-all duration-300 ease-in-out hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2 relative">
+            <!-- Remove Favorite Button -->
+            <form method="post" action="{% url 'toggle_favorit' favorit.akun.pk %}" class="absolute top-2 right-2 z-10">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transition-colors" title="Hapus dari favorit">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </form>
+
+            {% if favorit.akun.gambar %}
+                <img src="{{ favorit.akun.gambar.url }}" class="w-full h-40 object-cover rounded-md mb-4" alt="{{ favorit.akun.nama_akun }}">
+            {% endif %}
+            
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold px-2 py-0.5 rounded">{{ favorit.akun.game }}</span>
+                    <h5 class="text-md font-semibold nav-title truncate mt-2">{{ favorit.akun.nama_akun }}</h5>
+                    <p class="text-lg text-purple-600 dark:text-purple-400 font-bold">Rp {{ favorit.akun.harga|floatformat:0 }}</p>
+                </div>
+                <div class="text-right">
+                     <span class="nav-link text-xs">Level {{ favorit.akun.level }}</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <a href="{% url 'akun_detail' favorit.akun.pk %}" class="flex-1 text-center bg-gray-200 dark:bg-gray-800 hover:bg-purple-600 dark:hover:bg-purple-600 text-gray-800 dark:text-white hover:text-white text-sm font-bold py-2 px-4 rounded-md transition-colors">
+                    Lihat Detail
+                </a>
+            </div>
+
+            <p class="nav-link text-xs mt-3 text-center">Ditambahkan: {{ favorit.tanggal_ditambahkan|date:"d M Y" }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center p-16 bg-gray-100 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+        <svg class="w-24 h-24 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+        <h2 class="text-2xl font-semibold nav-title">Belum Ada Favorit</h2>
+        <p class="nav-link mt-2 mb-6">Mulai tambahkan akun ke favorit untuk menyimpannya di sini.</p>
+        <a href="{% url 'semua_akun' %}" class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-md transition-colors">
+            Jelajahi Akun
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

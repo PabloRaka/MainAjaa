@@ -1,0 +1,146 @@
+{% extends "main/base.html" %}
+
+{% block title %}Beli {{ produk.nama_paket }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12">
+    <div class="text-sm text-gray-400 mb-4">
+        <a href="{% url 'topup_index' %}" class="hover:text-white">Top Up</a> &raquo;
+        <span class="text-white">{{ produk.game }}</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="{
+        game: '{{ produk.game }}',
+        userId: '',
+        zoneId: '',
+        isLoading: false,
+        isValidated: false,
+        username: '',
+        errorMessage: '',
+        successMessage: ''
+    }">
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+                {% if produk.gambar %}
+                    <img src="{{ produk.gambar.url }}" alt="{{ produk.nama_paket }}" class="w-full h-auto object-cover rounded-lg">
+                {% else %}
+                    <div class="w-full h-64 bg-gray-800 flex items-center justify-center rounded-lg"><span class="text-gray-500">Gambar tidak tersedia</span></div>
+                {% endif %}
+            </div>
+
+            {% if produk.deskripsi %}
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4">Deskripsi Produk</h2>
+                <div class="prose prose-invert text-gray-300">
+                    <p>{{ produk.deskripsi|linebreaksbr }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 sticky top-24">
+                <h1 class="text-3xl font-bold text-white">{{ produk.nama_paket }}</h1>
+                <p class="text-gray-400 mt-1">{{ produk.game }}</p>
+                <p class="text-4xl font-bold text-purple-400 my-4">Rp {{ produk.harga|floatformat:0 }}</p>
+                
+                <form method="post" action="{% url 'beli_topup' produk.pk %}">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-400">ID Pemain</label>
+                            <input type="text" x-model="userId" name="game_user_id" placeholder="Masukkan ID Pemain" required class="w-full bg-gray-800 rounded p-2 mt-1 border border-gray-600 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                        <div x-show="game === 'Mobile Legends'">
+                            <label class="text-gray-400">ID Server</label>
+                            <input type="text" x-model="zoneId" name="game_zone_id" placeholder="Contoh: 1234" class="w-full bg-gray-800 rounded p-2 mt-1 border border-gray-600 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                    </div>
+
+                    <button type="button" @click="validateId" :disabled="isLoading" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                        <span x-show="!isLoading">Cek ID</span>
+                        <span x-show="isLoading">Mengecek...</span>
+                    </button>
+                    <p x-show="errorMessage" x-text="errorMessage" class="text-red-400 mt-2 text-sm"></p>
+                    <p x-show="successMessage" x-text="successMessage" class="text-green-400 mt-2 text-sm font-bold"></p>
+
+                    <button type="submit" :disabled="!isValidated || isLoading" class="mt-4 w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-md transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+                        Beli & Bayar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if nominal_lainnya %}
+    <div class="mt-16">
+        <h2 class="text-3xl font-bold text-white mb-6">Nominal Lainnya</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {% for item in nominal_lainnya %}
+            <a href="{% url 'topup_detail' item.pk %}" class="block bg-gray-900/50 p-4 rounded-lg border border-gray-700 hover:-translate-y-2 transition-transform">
+                <h5 class="text-md font-semibold text-white truncate">{{ item.nama_paket }}</h5>
+                <p class="text-gray-400 text-sm mt-1">{{ item.game }}</p>
+                <p class="text-lg text-purple-400 font-bold mt-3">Rp {{ item.harga|floatformat:0 }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ... (Fungsi getCookie dan validateId yang sudah kita buat sebelumnya diletakkan di sini) ...
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function validateId() {
+        let alpineComponent = this;
+        alpineComponent.isLoading = true;
+        alpineComponent.errorMessage = '';
+        alpineComponent.successMessage = '';
+        alpineComponent.isValidated = false;
+
+        fetch("{% url 'validate_game_id_api' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                game: alpineComponent.game,
+                user_id: alpineComponent.userId,
+                zone_id: alpineComponent.zoneId
+            })
+        })
+        .then(res => {
+            if (!res.ok) { return res.json().then(err => { throw new Error(err.error || 'Server Error') }); }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alpineComponent.username = data.username;
+                alpineComponent.successMessage = 'ID Ditemukan: ' + data.username;
+                alpineComponent.isValidated = true;
+            }
+        })
+        .catch(error => {
+            alpineComponent.errorMessage = error.message;
+        })
+        .finally(() => {
+            alpineComponent.isLoading = false;
+        });
+    }
+</script>
+{% endblock %}

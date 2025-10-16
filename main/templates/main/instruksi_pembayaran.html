@@ -1,0 +1,24 @@
+{% extends "main/base.html" %}
+{% block title %}Instruksi Pembayaran{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12 max-w-2xl">
+    <h1 class="text-4xl font-bold text-white text-center mb-6">Selesaikan Pembayaran</h1>
+    <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-8">
+        <p class="text-gray-400">Pesanan: <span class="font-mono text-white">{{ pembelian.kode_transaksi }}</span></p>
+        <p class="text-5xl font-bold text-purple-400 my-4">Rp {{ pembelian.harga_pembelian|floatformat:0 }}</p>
+        <div class="border-t border-gray-700 pt-4">
+            <h3 class="font-semibold text-white">Transfer ke rekening berikut:</h3>
+            <p class="text-lg text-gray-300 mt-2">Bank: <span class="font-bold">BCA</span></p>
+            <p class="text-lg text-gray-300">No. Rekening: <span class="font-bold">1234567890</span></p>
+            <p class="text-lg text-gray-300">Atas Nama: <span class="font-bold">PT Mainajaa Digital</span></p>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="mt-6 border-t border-gray-700 pt-6">
+            {% csrf_token %}
+            <label for="bukti_pembayaran" class="block font-semibold text-white mb-2">Unggah Bukti Pembayaran</label>
+            <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" required class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700">
+            <button type="submit" class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-md">Konfirmasi Pembayaran</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

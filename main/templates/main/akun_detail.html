@@ -1,0 +1,179 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}{{ akun.nama_akun }} | Mainajaa Gaming{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+    <div class="text-sm text-gray-400 mb-6">
+        <a href="{% url 'semua_akun' %}" class="hover:text-white">Semua Akun</a>
+        <span class="mx-2">&rsaquo;</span>
+        <a href="{% url 'kategori' akun.game %}" class="hover:text-white">{{ akun.game }}</a>
+        <span class="mx-2">&rsaquo;</span>
+        <span class="text-white">{{ akun.nama_akun }}</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-2">
+            <div x-data="{ mainImage: '{{ akun.gambar.url }}' }">
+                <div class="relative mb-4">
+                    <img :src="mainImage" class="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-lg" alt="Gambar utama">
+                    <span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">VERIFIED</span>
+                </div>
+                <div class="flex space-x-2 overflow-x-auto pb-2">
+                    <img @click="mainImage = '{{ akun.gambar.url }}'" src="{{ akun.gambar.url }}" class="w-20 h-20 object-cover rounded-md cursor-pointer border-2" :class="{ 'border-purple-500': mainImage === '{{ akun.gambar.url }}' }">
+                    {% for g in akun.gambar_tambahan.all %}
+                    <img @click="mainImage = '{{ g.gambar.url }}'" src="{{ g.gambar.url }}" class="w-20 h-20 object-cover rounded-md cursor-pointer border-2" :class="{ 'border-purple-500': mainImage === '{{ g.gambar.url }}' }">
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-6 mt-8">
+                <h2 class="text-2xl font-bold text-white mb-4">Deskripsi Akun</h2>
+                <div class="text-gray-300 prose prose-invert max-w-none">{{ akun.deskripsi|linebreaks }}</div>
+                {% if akun.highlight %}
+                <h3 class="text-xl font-bold text-white mt-6 mb-3">Highlight Akun:</h3>
+                <div class="prose prose-invert max-w-none text-gray-300">{{ akun.highlight|linebreaks }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-gray-900/50 border border-gray-700 rounded-lg p-6 sticky top-8">
+                <h1 class="text-3xl font-bold text-white leading-tight">{{ akun.nama_akun }}</h1>
+                <div class="flex items-center space-x-4 text-sm text-gray-400 mt-2">
+                    <span>{{ akun.game }}</span>
+                    <span>&bull;</span>
+                    <span>Level {{ akun.level }}</span>
+                </div>
+                <p class="text-4xl font-bold text-purple-400 mt-6">Rp {{ akun.harga|floatformat:0 }}</p>
+                
+                <div class="mt-6 space-y-4">
+                    <form action="{% url 'beli_akun' akun.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-md transition-colors">
+                            Beli Sekarang
+                        </button>
+                    </form>
+                    {% if user in akun.favorit.all %}
+                        <a href="{% url 'hapus_dari_favorit' akun.pk %}" class="block w-full text-center bg-gray-700 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md">Hapus dari Favorit</a>
+                    {% else %}
+                        <a href="{% url 'tambah_ke_favorit' akun.pk %}" class="block w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-md">Tambah ke Favorit</a>
+                    {% endif %}
+                </div>
+
+                <div class="border-t border-gray-700 mt-6 pt-4">
+                    <h4 class="font-semibold text-white mb-2">Perlindungan Pembeli</h4>
+                    <ul class="text-sm text-gray-400 space-y-2">
+                        <li class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Garansi 100% Uang Kembali</li>
+                        <li class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Transaksi Aman </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 mb-16 mt-16">
+    <h2 class="text-2xl font-bold text-white mb-4">Ulasan Pelanggan untuk {{ akun.game }}</h2>
+    <div class="space-y-6">
+        {% for ulasan in ulasan_list %}
+        <div class="border-b border-gray-700 pb-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-semibold text-white">Membeli: <span class="text-purple-400">{{ ulasan.akun.nama_akun }}</span></p>
+                    <p class="text-sm text-gray-400">oleh {{ ulasan.pembeli.username }} pada {{ ulasan.tanggal_pembelian|date:"d M Y" }}</p>
+                </div>
+                <div class="flex items-center">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= ulasan.rating %}
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        {% else %}
+                            <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% if ulasan.ulasan %}
+            <p class="text-gray-300 mt-2">{{ ulasan.ulasan }}</p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-gray-500">Belum ada ulasan untuk game ini.</p>
+        {% endfor %}
+    </div>
+</div>
+    <div class="mt-16">
+        <h2 class="text-3xl font-bold text-white">Akun Serupa</h2>
+        </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ midtrans_client_key }}"></script>
+<script type="text/javascript">
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    document.getElementById('tombol-beli').onclick = function(){
+        this.disabled = true;
+        this.innerText = 'Memproses...';
+
+        fetch("{% url 'buat_transaksi_api' akun.pk %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const tombol = document.getElementById('tombol-beli');
+            if (data.token) {
+                snap.pay(data.token, {
+                    onSuccess: function(result){
+                        window.location.href = "{% url 'riwayat_pembelian' %}";
+                    },
+                    onPending: function(result){
+                        window.location.href = "{% url 'riwayat_pembelian' %}";
+                    },
+                    onError: function(result){
+                        alert("Pembayaran gagal!");
+                        tombol.disabled = false;
+                        tombol.innerText = 'Beli Sekarang';
+                    },
+                    onClose: function(){
+                        tombol.disabled = false;
+                        tombol.innerText = 'Beli Sekarang';
+                    }
+                });
+            } else {
+                alert('Error: ' + (data.error || 'Gagal memuat pembayaran.'));
+                tombol.disabled = false;
+                tombol.innerText = 'Beli Sekarang';
+            }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            alert('Terjadi kesalahan. Silakan coba lagi.');
+            const tombol = document.getElementById('tombol-beli');
+            tombol.disabled = false;
+            tombol.innerText = 'Beli Sekarang';
+        });
+    };
+</script>
+{% endblock %}
