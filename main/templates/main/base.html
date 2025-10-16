@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mainajaa Gaming</title>
-    {% tailwind_css %}
+    
+    <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+    
     <style>
         /* Custom dark mode styles */
         .light-mode {
@@ -139,7 +141,6 @@
             </div>
             
             <div class="flex items-center gap-6">
-                <!-- Theme Toggle Switch -->
                 <label class="theme-switch">
                     <input type="checkbox" id="theme-toggle">
                     <span class="theme-slider">
@@ -199,7 +200,6 @@
         {% block content %}{% endblock %}
     </main>
     
-    <!-- Theme Toggle Script -->
     <script>
     (function() {
         const themeToggle = document.getElementById('theme-toggle');
