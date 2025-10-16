@@ -16,7 +16,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
 allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost')
-ALLOWED_HOSTS = [127.0.0.1,localhost,main-ajaa.vercel.app]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'main-ajaa.vercel.app']
 
 csrf_origins_str = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()]
