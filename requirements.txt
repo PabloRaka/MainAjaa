@@ -12,6 +12,7 @@ idna==3.10
 midtransclient==1.4.2
 pillow==11.3.0
 psycopg2-binary==2.9.11
+python-dotenv
 pycparser==2.23
 python-dateutil==2.9.0.post0
 requests==2.32.5
