@@ -3,11 +3,15 @@
 # Keluar jika ada error
 set -e
 
+# Pastikan pip terinstall
+python3.12 -m ensurepip
+python3.12 -m pip install --upgrade pip
+
 # Install dependencies
-pip install -r requirements.txt
+python3.12 -m pip install -r requirements.txt
 
 # Kumpulkan file statis
-python manage.py collectstatic --no-input
+python3.12 manage.py collectstatic --no-input --clear
 
-# (Opsional) Jalankan migrasi database
-python manage.py migrate
+# Jalankan migrasi database
+python3.12 manage.py migrate
