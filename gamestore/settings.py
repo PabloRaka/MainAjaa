@@ -12,9 +12,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Memuat variabel dari file .env
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# ===============================================
-# KUNCI RAHASIA DIAMBIL DARI .ENV
-# ===============================================
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
@@ -24,16 +21,13 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'main-ajaa.vercel.app']
 csrf_origins_str = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()]
 
-# ===============================================
-# APLIKASI
-# ===============================================
 INSTALLED_APPS = [
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
     'main', 'theme', 'widget_tweaks', 'tailwind', 'allauth', 'allauth.account',
     'allauth.socialaccount', 'django.contrib.sites',
 ]
-# ... (sisa kode INSTALLED_APPS, MIDDLEWARE, dll. tidak perlu diubah) ...
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -106,10 +100,6 @@ if not encryption_key_str:
     raise ValueError("ERROR: ENCRYPTION_KEY tidak ditemukan. Pastikan ada di file .env Anda.")
 ENCRYPTION_KEY = encryption_key_str.encode()
 
-
-# ===============================================
-# ALLAUTH & MIDTRANS
-# ===============================================
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
