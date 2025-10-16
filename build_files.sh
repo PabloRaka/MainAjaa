@@ -3,11 +3,15 @@
 # Keluar jika ada error
 set -e
 
-# Install dependencies (dengan perintah yang sudah benar)
+python3.9 -m ensurepip
+python3.9 -m pip install --upgrade pip
+
+
+# Install dependencies
 python3.9 -m pip install -r requirements.txt
 
 # Kumpulkan file statis
-python manage.py collectstatic --no-input
+python manage.py collectstatic --no-input --clear
 
-# (Opsional) Jalankan migrasi database
+# Jalankan migrasi database
 python manage.py migrate
