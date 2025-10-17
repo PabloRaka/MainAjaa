@@ -10,9 +10,6 @@ python3.12 -m pip install --upgrade pip
 # Install dependensi Python
 python3.12 -m pip install -r requirements.txt
 
-# ===============================================
-# LANGKAH KRUSIAL YANG HILANG: Buat file CSS Tailwind
-# ===============================================
 python3.12 manage.py tailwind build
 
 # Kumpulkan file statis
