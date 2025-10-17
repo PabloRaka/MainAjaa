@@ -1,14 +1,19 @@
 #!/bin/bash
 
-# Keluar jika ada error
+# Keluar jika ada perintah yang gagal
 set -e
 
-# Pastikan pip terinstall
+# Pastikan pip tersedia dan perbarui
 python3.12 -m ensurepip
 python3.12 -m pip install --upgrade pip
 
-# Install dependencies
+# Install dependensi Python
 python3.12 -m pip install -r requirements.txt
+
+# ===============================================
+# LANGKAH KRUSIAL YANG HILANG: Buat file CSS Tailwind
+# ===============================================
+python3.12 manage.py tailwind build
 
 # Kumpulkan file statis
 python3.12 manage.py collectstatic --no-input --clear
