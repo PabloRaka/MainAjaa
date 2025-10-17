@@ -1,0 +1,15 @@
+{
+  "name": "gamestore",
+  "version": "1.0.0",
+  "description": "Install tailwind dependencies",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwind -i theme/static/src/input.css -o theme/static/css/dist/styles.css --minify"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^10.4.19",
+    "tailwindcss": "^3.4.4"
+  }
+}
